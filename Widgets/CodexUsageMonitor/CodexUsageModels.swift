@@ -404,7 +404,6 @@ struct OpenAIStatusSnapshot: Codable, Equatable {
     let overallIndicator: OpenAIServiceIndicator
     let description: String?
     let groups: [OpenAIStatusGroup]
-    let updatedAt: Date?
     let fetchedAt: Date
 
     func group(named name: String) -> OpenAIStatusGroup? {
