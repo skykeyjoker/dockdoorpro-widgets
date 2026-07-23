@@ -112,7 +112,7 @@ struct CodexUsageMonitorView: View {
         case .concentric:
             CodexQuarterRings(
                 progress: progress(window),
-                gradient: ringGradient(window)
+                colors: ringColors(window)
             )
         case .segmented:
             CodexSegmentedRing(
@@ -343,34 +343,34 @@ struct CodexUsageMonitorView: View {
     }
 
     private func ringGradient(_ window: CodexQuotaWindow) -> LinearGradient {
+        LinearGradient(
+            colors: ringColors(window),
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+
+    private func ringColors(_ window: CodexQuotaWindow) -> [Color] {
         switch window.remainingPercent {
         case ..<10:
-            return LinearGradient(
-                colors: [
-                    CodexPalette.softCritical(for: appearance),
-                    CodexPalette.orange(for: appearance).opacity(0.88),
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+            return [
+                CodexPalette.softCritical(for: appearance),
+                CodexPalette.orange(for: appearance).opacity(0.88),
+            ]
         case ..<25:
-            return LinearGradient(
-                colors: [
-                    CodexPalette.yellow(for: appearance),
-                    CodexPalette.orange(for: appearance),
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+            return [
+                CodexPalette.yellow(for: appearance),
+                CodexPalette.orange(for: appearance),
+            ]
         default:
-            return theme.gradient
+            return [theme.primary, theme.secondary]
         }
     }
 }
 
 private struct CodexQuarterRings: View {
     let progress: Double
-    let gradient: LinearGradient
+    let colors: [Color]
 
     private var clampedProgress: Double {
         min(max(progress, 0), 1)
@@ -382,26 +382,46 @@ private struct CodexQuarterRings: View {
             let lineWidth = max(2.4, diameter * 0.082)
             let gap = max(0.75, diameter * 0.014)
             let step = lineWidth + gap
+            let outerRadius = diameter * 0.5
+            let innerRadius = max(0, outerRadius - step * 3)
 
             ZStack {
                 ForEach(0..<4, id: \.self) { index in
-                    let ringProgress = min(
-                        max(clampedProgress * 4 - Double(index), 0),
-                        1
-                    )
                     let inset = CGFloat(index) * step
 
                     Circle()
                         .stroke(Color.primary.opacity(0.10), lineWidth: lineWidth)
                         .padding(inset)
-                    Circle()
-                        .trim(from: 0, to: ringProgress)
-                        .stroke(
-                            gradient,
-                            style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
-                        )
-                        .rotationEffect(.degrees(-90))
-                        .padding(inset)
+                }
+
+                RadialGradient(
+                    colors: Array(colors.reversed()),
+                    center: .center,
+                    startRadius: innerRadius,
+                    endRadius: outerRadius
+                )
+                .mask {
+                    ZStack {
+                        ForEach(0..<4, id: \.self) { index in
+                            let ringProgress = min(
+                                max(clampedProgress * 4 - Double(index), 0),
+                                1
+                            )
+                            let inset = CGFloat(index) * step
+
+                            Circle()
+                                .trim(from: 0, to: ringProgress)
+                                .stroke(
+                                    Color.white,
+                                    style: StrokeStyle(
+                                        lineWidth: lineWidth,
+                                        lineCap: .round
+                                    )
+                                )
+                                .rotationEffect(.degrees(-90))
+                                .padding(inset)
+                        }
+                    }
                 }
             }
         }
