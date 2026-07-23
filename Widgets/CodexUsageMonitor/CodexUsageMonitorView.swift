@@ -352,20 +352,47 @@ struct CodexUsageMonitorView: View {
     }
 
     private func ringColors(_ window: CodexQuotaWindow) -> [Color] {
+        let baseColors: [Color]
         switch window.remainingPercent {
         case ..<10:
-            return [
+            baseColors = [
                 CodexPalette.softCritical(for: appearance),
                 CodexPalette.orange(for: appearance).opacity(0.88),
             ]
         case ..<25:
-            return [
+            baseColors = [
                 CodexPalette.yellow(for: appearance),
                 CodexPalette.orange(for: appearance),
             ]
         default:
-            return [theme.primary, theme.secondary]
+            baseColors = [theme.primary, theme.secondary]
         }
+
+        guard let primary = baseColors.first,
+              let secondary = baseColors.last
+        else {
+            return baseColors
+        }
+        return [
+            blendedRingColor(primary, secondary, fraction: 0.15),
+            blendedRingColor(primary, secondary, fraction: 0.85),
+        ]
+    }
+
+    private func blendedRingColor(
+        _ primary: Color,
+        _ secondary: Color,
+        fraction: CGFloat
+    ) -> Color {
+        guard let start = NSColor(primary).usingColorSpace(.deviceRGB),
+              let end = NSColor(secondary).usingColorSpace(.deviceRGB)
+        else {
+            return fraction < 0.5 ? primary : secondary
+        }
+        return Color(nsColor: start.blended(
+            withFraction: min(max(fraction, 0), 1),
+            of: end
+        ) ?? start)
     }
 }
 
