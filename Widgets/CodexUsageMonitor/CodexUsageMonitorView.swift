@@ -1,3 +1,4 @@
+import AppKit
 import DockDoorWidgetSDK
 import SwiftUI
 
@@ -376,52 +377,52 @@ private struct CodexQuarterRings: View {
         min(max(progress, 0), 1)
     }
 
+    private func ringColor(at index: Int) -> Color {
+        guard let outerColor = colors.first else { return .accentColor }
+        guard let innerColor = colors.last, colors.count > 1 else {
+            return outerColor
+        }
+        let fraction = CGFloat(index) / 3
+        guard let outer = NSColor(outerColor).usingColorSpace(.deviceRGB),
+              let inner = NSColor(innerColor).usingColorSpace(.deviceRGB)
+        else {
+            return index < 2 ? outerColor : innerColor
+        }
+        return Color(nsColor: outer.blended(
+            withFraction: fraction,
+            of: inner
+        ) ?? outer)
+    }
+
     var body: some View {
         GeometryReader { proxy in
             let diameter = min(proxy.size.width, proxy.size.height)
             let lineWidth = max(2.4, diameter * 0.082)
             let gap = max(0.75, diameter * 0.014)
             let step = lineWidth + gap
-            let outerRadius = diameter * 0.5
-            let innerRadius = max(0, outerRadius - step * 3)
 
             ZStack {
                 ForEach(0..<4, id: \.self) { index in
+                    let ringProgress = min(
+                        max(clampedProgress * 4 - Double(index), 0),
+                        1
+                    )
                     let inset = CGFloat(index) * step
 
                     Circle()
                         .stroke(Color.primary.opacity(0.10), lineWidth: lineWidth)
                         .padding(inset)
-                }
-
-                RadialGradient(
-                    colors: Array(colors.reversed()),
-                    center: .center,
-                    startRadius: innerRadius,
-                    endRadius: outerRadius
-                )
-                .mask {
-                    ZStack {
-                        ForEach(0..<4, id: \.self) { index in
-                            let ringProgress = min(
-                                max(clampedProgress * 4 - Double(index), 0),
-                                1
+                    Circle()
+                        .trim(from: 0, to: ringProgress)
+                        .stroke(
+                            ringColor(at: index),
+                            style: StrokeStyle(
+                                lineWidth: lineWidth,
+                                lineCap: .round
                             )
-                            let inset = CGFloat(index) * step
-
-                            Circle()
-                                .trim(from: 0, to: ringProgress)
-                                .stroke(
-                                    Color.white,
-                                    style: StrokeStyle(
-                                        lineWidth: lineWidth,
-                                        lineCap: .round
-                                    )
-                                )
-                                .rotationEffect(.degrees(-90))
-                                .padding(inset)
-                        }
-                    }
+                        )
+                        .rotationEffect(.degrees(-90))
+                        .padding(inset)
                 }
             }
         }
