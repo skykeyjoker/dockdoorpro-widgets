@@ -1058,10 +1058,13 @@ struct CodexUsageMonitorPanel: View {
                     .font(.system(size: 12, weight: .semibold))
                 Text(status.updatedAt.map {
                     CodexLocalization.text(
-                        "官方状态 · \($0.codexRelativeText)更新",
-                        "Official status · updated \($0.codexRelativeText)"
+                        "最近事件 · \($0.codexRelativeText)更新",
+                        "Latest event · updated \($0.codexRelativeText)"
                     )
-                } ?? CodexLocalization.text("OpenAI 官方状态", "Official OpenAI status"))
+                } ?? CodexLocalization.text(
+                    "官方状态 · \(status.fetchedAt.codexRelativeText)获取",
+                    "Official status · fetched \(status.fetchedAt.codexRelativeText)"
+                ))
                     .font(.system(size: 9, weight: .medium))
                     .foregroundStyle(.secondary)
             }

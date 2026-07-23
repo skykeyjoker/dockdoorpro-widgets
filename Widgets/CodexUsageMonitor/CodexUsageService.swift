@@ -182,16 +182,23 @@ struct CodexUsageService {
     }
 
     private struct StatusResponse: Decodable {
-        struct Page: Decodable {
-            let updatedAt: String?
-            enum CodingKeys: String, CodingKey { case updatedAt = "updated_at" }
-        }
         struct Status: Decodable {
             let description: String?
             let indicator: String
         }
-        let page: Page?
         let status: Status
+    }
+
+    private struct StatusIncidentsResponse: Decodable {
+        struct Incident: Decodable {
+            let updatedAt: String?
+
+            enum CodingKeys: String, CodingKey {
+                case updatedAt = "updated_at"
+            }
+        }
+
+        let incidents: [Incident]
     }
 
     private struct IncidentResponse: Decodable {
@@ -340,11 +347,17 @@ struct CodexUsageService {
     func fetchStatus() async throws -> OpenAIStatusSnapshot {
         let summaryURL = URL(string: "https://status.openai.com/proxy/status.openai.com")!
         let statusURL = URL(string: "https://status.openai.com/api/v2/status.json")!
+        let incidentsURL = URL(string: "https://status.openai.com/api/v2/incidents.json")!
 
         async let incidentData = requestData(summaryURL, timeout: 12)
         async let statusData = requestData(statusURL, timeout: 12)
+        async let latestIncidentUpdatedAt = fetchLatestIncidentUpdatedAt(incidentsURL)
 
-        let (incidentPayload, statusPayload) = try await (incidentData, statusData)
+        let (incidentPayload, statusPayload, eventUpdatedAt) = try await (
+            incidentData,
+            statusData,
+            latestIncidentUpdatedAt
+        )
         let incident = try JSONDecoder().decode(IncidentResponse.self, from: incidentPayload)
         let status = try JSONDecoder().decode(StatusResponse.self, from: statusPayload)
 
@@ -388,9 +401,21 @@ struct CodexUsageService {
             overallIndicator: OpenAIServiceIndicator(overallIndicator: status.status.indicator),
             description: status.status.description,
             groups: groups,
-            updatedAt: status.page?.updatedAt.flatMap(parseISO8601),
+            updatedAt: eventUpdatedAt,
             fetchedAt: Date()
         )
+    }
+
+    private func fetchLatestIncidentUpdatedAt(_ url: URL) async -> Date? {
+        guard let data = try? await requestData(url, timeout: 12),
+              let response = try? JSONDecoder().decode(StatusIncidentsResponse.self, from: data)
+        else {
+            return nil
+        }
+
+        return response.incidents
+            .compactMap { $0.updatedAt.flatMap(parseISO8601) }
+            .max()
     }
 
     private func requestUsage(_ credentials: Credentials) async throws -> UsageResponse {
