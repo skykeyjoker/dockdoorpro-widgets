@@ -511,7 +511,7 @@ struct CodexUsageMonitorPanel: View {
                                     .font(.system(
                                         size: 7.5,
                                         weight: isHovered ? .semibold : .medium,
-                                        design: .rounded
+                                        design: .monospaced
                                     ))
                                     .foregroundStyle(
                                         isHovered ? theme.primary : Color.secondary.opacity(0.72)
@@ -545,7 +545,7 @@ struct CodexUsageMonitorPanel: View {
                         Text(snapshot.chartDays.compactMap(\.estimatedCostUSD).max().map {
                             "$\(Int($0.rounded()))"
                         } ?? formatTokenCount(snapshot.chartDays.map(\.totalTokens).max() ?? 0))
-                            .font(.system(size: 8, weight: .medium, design: .rounded).monospacedDigit())
+                            .font(.system(size: 8, weight: .medium, design: .monospaced))
                             .foregroundStyle(.secondary)
                             .frame(maxWidth: .infinity, alignment: .trailing)
                     }
@@ -625,9 +625,9 @@ struct CodexUsageMonitorPanel: View {
                 .font(.system(size: 9, weight: .medium))
                 .foregroundStyle(.secondary)
             Text(cost.map(formatUSD) ?? "—")
-                .font(.system(size: 15, weight: .bold, design: .rounded).monospacedDigit())
+                .font(.system(size: 15, weight: .bold, design: .monospaced))
             Text("\(formatTokenCount(tokens)) API tokens")
-                .font(.system(size: 10, weight: .semibold, design: .rounded).monospacedDigit())
+                .font(.system(size: 10, weight: .semibold, design: .monospaced))
                 .foregroundStyle(.secondary)
         }
     }
@@ -637,29 +637,29 @@ struct CodexUsageMonitorPanel: View {
             Text(chartDayTooltipTitle(day.dayKey))
                 .font(.system(size: 8.5, weight: .semibold))
             Text("\(day.totalTokens.formatted()) API tokens")
-                .font(.system(size: 8, weight: .medium, design: .rounded).monospacedDigit())
+                .font(.system(size: 8, weight: .medium, design: .monospaced))
             Text(CodexLocalization.text(
                 "输入 \(formatTokenCount(day.inputTokens)) · 输出 \(formatTokenCount(day.outputTokens))",
                 "Input \(formatTokenCount(day.inputTokens)) · Output \(formatTokenCount(day.outputTokens))"
             ))
-                .font(.system(size: 7.5, weight: .medium, design: .rounded).monospacedDigit())
+                .font(.system(size: 7.5, weight: .medium, design: .monospaced))
                 .foregroundStyle(.secondary)
             if day.cachedInputTokens > 0 || day.cacheWriteInputTokens > 0 {
                 Text(CodexLocalization.text(
                     "Cache 读 \(formatTokenCount(day.cachedInputTokens)) · 写 \(formatTokenCount(day.cacheWriteInputTokens))",
                     "Cache read \(formatTokenCount(day.cachedInputTokens)) · write \(formatTokenCount(day.cacheWriteInputTokens))"
                 ))
-                    .font(.system(size: 7.5, weight: .medium, design: .rounded).monospacedDigit())
+                    .font(.system(size: 7.5, weight: .medium, design: .monospaced))
                     .foregroundStyle(.secondary)
             }
             if day.priorityTokens > 0 {
                 Text("Fast/Priority \(formatTokenCount(day.priorityTokens))")
-                    .font(.system(size: 7.5, weight: .semibold, design: .rounded).monospacedDigit())
+                    .font(.system(size: 7.5, weight: .semibold, design: .monospaced))
                     .foregroundStyle(theme.secondary)
             }
             Text(day.estimatedCostUSD.map(formatUSD)
                 ?? CodexLocalization.text("费用未知", "Cost unavailable"))
-                .font(.system(size: 8, weight: .semibold, design: .rounded).monospacedDigit())
+                .font(.system(size: 8, weight: .semibold, design: .monospaced))
                 .foregroundStyle(theme.primary)
         }
         .padding(.horizontal, 7)
@@ -810,14 +810,14 @@ struct CodexUsageMonitorPanel: View {
                     .foregroundStyle(.secondary)
                 HStack(spacing: 4) {
                     Text(value)
-                        .font(.system(size: 11, weight: .bold, design: .rounded).monospacedDigit())
+                        .font(.system(size: 11, weight: .semibold, design: .monospaced))
                         .lineLimit(1)
                     Spacer(minLength: 2)
                     if let trailingDetail {
                         Image(systemName: "clock")
                             .font(.system(size: 8, weight: .semibold))
                         Text(trailingDetail)
-                            .font(.system(size: 8.5, weight: .semibold, design: .rounded).monospacedDigit())
+                            .font(.system(size: 8.5, weight: .semibold, design: .monospaced))
                             .lineLimit(1)
                     }
                 }
@@ -846,7 +846,7 @@ struct CodexUsageMonitorPanel: View {
                         }
                         Spacer()
                         Text("\(Int(window.remainingPercent.rounded()))%")
-                            .font(.system(size: 11, weight: .bold, design: .rounded).monospacedDigit())
+                            .font(.system(size: 11, weight: .semibold, design: .monospaced))
                     }
                     .padding(.horizontal, 10)
                     .padding(.vertical, 8)
