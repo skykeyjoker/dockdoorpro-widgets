@@ -776,7 +776,7 @@ struct CodexUsageMonitorPanel: View {
                 metricTile(
                     title: CodexLocalization.text("重置额度", "Quota resets"),
                     value: usage.resetCreditsAvailable.map {
-                        CodexLocalization.text("\($0) 次可用", "\($0) available")
+                        CodexLocalization.text("\($0)次可用", "\($0) available")
                     } ?? CodexLocalization.text("暂无数据", "Unavailable"),
                     symbol: "arrow.counterclockwise.circle.fill",
                     color: theme.primary,
@@ -808,21 +808,26 @@ struct CodexUsageMonitorPanel: View {
                 Text(title)
                     .font(.system(size: 9, weight: .medium))
                     .foregroundStyle(.secondary)
-                HStack(spacing: 4) {
+                HStack(spacing: 3) {
                     Text(value)
                         .font(.system(size: 11, weight: .semibold, design: .monospaced))
                         .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                        .allowsTightening(true)
+                        .layoutPriority(1)
                     Spacer(minLength: 2)
                     if let trailingDetail {
                         Image(systemName: "clock")
                             .font(.system(size: 8, weight: .semibold))
                         Text(trailingDetail)
-                            .font(.system(size: 8.5, weight: .semibold, design: .monospaced))
+                            .font(.system(size: 8, weight: .semibold, design: .monospaced))
                             .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                            .allowsTightening(true)
                     }
                 }
             }
-            Spacer(minLength: 0)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(10)
         .frame(maxWidth: .infinity)
